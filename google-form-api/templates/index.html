@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Form Interaction</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .container {
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="mb-4">Google Form Interaction</h1>
+    
+    <!-- Section 1: Fetch Entries -->
+    <div class="row mb-4">
+      <div class="col">
+        <h2>Fetch Entries</h2>
+        <div class="form-group">
+          <label for="fetchFromAddress">From Address:</label>
+          <input type="text" class="form-control" id="fetchFromAddress" placeholder="Enter address" required>
+        </div>
+        <button id="getEntriesBtn" class="btn btn-primary">Get Entries</button>
+        <hr>
+        <h3>Entries:</h3>
+        <ul id="entriesList"></ul>
+      </div>
+    </div>
+    
+    <!-- Section 2: Submit Form -->
+    <div class="row">
+      <div class="col">
+        <h2>Submit Form</h2>
+        <div class="form-group">
+          <label for="submitFromAddress">From Address:</label>
+          <input type="text" class="form-control" id="submitFromAddress" placeholder="Enter address" required>
+        </div>
+        <div class="form-group">
+          <label for="name">Name:</label>
+          <input type="text" class="form-control" id="name" placeholder="Enter name" required>
+        </div>
+        <div class="form-group">
+          <label for="usn">USN:</label>
+          <input type="text" class="form-control" id="usn" placeholder="Enter USN" required>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone:</label>
+          <input type="text" class="form-control" id="phone" placeholder="Enter phone" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" class="form-control" id="email" placeholder="Enter email" required>
+        </div>
+        <button id="submitFormBtn" class="btn btn-primary">Submit Form</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS and jQuery (needed for Bootstrap) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <!-- Custom JavaScript -->
+  <script>
+    // Function to fetch entries
+    document.getElementById('getEntriesBtn').addEventListener('click', async function(event) {
+      event.preventDefault();
+      
+      const fromAddress = document.getElementById('fetchFromAddress').value.trim();
+      if (!fromAddress) {
+        alert('Please enter a valid address');
+        return;
+      }
+
+      const response = await fetch(`/entries?from=${fromAddress}`);
+      const entries = await response.json();
+
+      const entriesList = document.getElementById('entriesList');
+      entriesList.innerHTML = ''; // Clear previous entries
+      
+      entries.forEach(entry => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `Name: ${entry.name}, USN: ${entry.usn}, Phone: ${entry.phone}, Email: ${entry.email}`;
+        entriesList.appendChild(listItem);
+      });
+    });
+
+    // Function to submit form
+    document.getElementById('submitFormBtn').addEventListener('click', async function(event) {
+      event.preventDefault();
+
+      const formData = {
+        name: document.getElementById('name').value.trim(),
+        usn: document.getElementById('usn').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        from: document.getElementById('submitFromAddress').value.trim()
+      };
+
+      if (!formData.from) {
+        alert('Please enter a valid address');
+        return;
+      }
+
+      const queryString = new URLSearchParams(formData).toString();
+      const response = await fetch(`/submit?${queryString}`, { method: 'POST' });
+      const result = await response.json();
+
+      alert(result.message);
+      document.getElementById('name').value = '';
+      document.getElementById('usn').value = '';
+      document.getElementById('phone').value = '';
+      document.getElementById('email').value = '';
+    });
+  </script>
+</body>
+</html>
